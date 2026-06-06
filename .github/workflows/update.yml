@@ -1,0 +1,36 @@
+# .github/workflows/update.yml
+name: Auto Update Skor Piala Dunia 2026
+
+on:
+  schedule:
+    # Perintah agar bot berjalan otomatis setiap 5 menit
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    # Fitur bonus agar Anda bisa memicu tombol update secara manual jika tidak sabar menunggu 5 menit
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Mengizinkan bot untuk menulis/mengubah file skor.json Anda
+
+    steps:
+    - name: Mengambil kode repositori
+      uses: actions/checkout@v4
+
+    - name: Menyiapkan lingkungan Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-node-version: 20
+
+    - name: Menjalankan Bot Pengambil Skor
+      run: node bot-skor.js
+
+    - name: Menyimpan perubahan data ke skor.json jika ada gol baru
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add skor.json
+        git diff-index --quiet HEAD || git commit -m "Bot: Skor otomatis diperbarui [skip ci]"
+        git push
